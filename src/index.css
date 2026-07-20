@@ -1,0 +1,447 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* atria admin — same calm fintech token system as the buyer/seller app */
+
+@layer base {
+  :root {
+    /* Warm paper canvas + cool ink — the identity. Surfaces around it are
+       warmed (hue ~44) so the grays agree with the cream; text stays cool. */
+    --background: 48 38% 97%;
+    --foreground: 222 16% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 16% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 16% 12%;
+
+    /* Indigo — reserved for interactive: links, focus, selection, active nav. */
+    --primary: 240 60% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 44 20% 92%;
+    --secondary-foreground: 222 16% 22%;
+
+    --muted: 46 26% 94%;
+    --muted-foreground: 220 9% 46%;
+
+    /* accent is now an alias of success (the one green). Kept as a token so
+       brand-moment consumers (ADMIN chip, copied-state) resolve to green. */
+    --accent: 158 64% 30%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* One success green — the emerald the Badge already used, text-safe. */
+    --success: 158 64% 30%;
+    --success-foreground: 0 0% 100%;
+    /* warning = bright amber for fills/dots; warning-strong = text-safe. */
+    --warning: 38 92% 50%;
+    --warning-strong: 30 90% 36%;
+    --warning-foreground: 222 16% 12%;
+    --info: 215 90% 46%;
+    --info-foreground: 0 0% 100%;
+    /* violet — a categorical hue for "money returned" + sell intent, so those
+       never borrow a status color. */
+    --violet: 262 58% 52%;
+    --violet-foreground: 0 0% 100%;
+
+    /* overlay — scrim for dialogs. Deliberately dark in BOTH themes so it
+       never inverts to a white fog over dark UI. */
+    --overlay: 222 20% 7%;
+
+    --border: 44 16% 88%;
+    --input: 44 16% 88%;
+    --ring: 240 60% 42%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 16% 22%;
+    --sidebar-accent: 46 26% 94%;
+    --sidebar-border: 44 16% 88%;
+  }
+
+  .dark {
+    /* Same warm-paper family after dark: surfaces move to hue 36 at the same
+       lightnesses (contrast preserved); ink stays near-neutral. */
+    --background: 36 8% 8%;
+    --foreground: 40 14% 95%;
+
+    --card: 36 8% 11%;
+    --card-foreground: 40 14% 95%;
+
+    --popover: 36 8% 11%;
+    --popover-foreground: 40 14% 95%;
+
+    --primary: 240 70% 68%;
+    --primary-foreground: 36 8% 8%;
+
+    --secondary: 36 8% 16%;
+    --secondary-foreground: 40 12% 90%;
+
+    --muted: 36 8% 15%;
+    --muted-foreground: 40 8% 62%;
+
+    --accent: 156 58% 55%;
+    --accent-foreground: 36 8% 8%;
+
+    --destructive: 0 68% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 156 58% 55%;
+    --success-foreground: 36 8% 8%;
+    --warning: 38 92% 56%;
+    --warning-strong: 40 92% 62%;
+    --warning-foreground: 36 8% 8%;
+    --info: 215 90% 64%;
+    --info-foreground: 36 8% 8%;
+    --violet: 262 70% 74%;
+    --violet-foreground: 36 8% 8%;
+
+    --overlay: 222 24% 5%;
+
+    --border: 36 8% 18%;
+    --input: 36 8% 18%;
+    --ring: 240 70% 68%;
+
+    --sidebar-background: 36 8% 9%;
+    --sidebar-foreground: 40 12% 90%;
+    --sidebar-accent: 36 8% 16%;
+    --sidebar-border: 36 8% 18%;
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont,
+      "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    letter-spacing: -0.005em;
+  }
+
+  .nums,
+  input[type="tel"],
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "cv11";
+  }
+}
+
+@layer utilities {
+  .thin-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .thin-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+  .thin-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+  .thin-scroll::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Real sweep: a foreground-tinted highlight travels over the muted base.
+     Previously both stops resolved to the same token, so skeletons were dead
+     static slabs in both themes. */
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--foreground) / 0.06) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 1000px 100%;
+  }
+  .dark .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--foreground) / 0.09) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 1000px 100%;
+  }
+
+  /* Top progress bar used by DataGrid `fetching` mode. Indeterminate slide. */
+  .atria-progress {
+    animation: atria-progress-slide 1.15s linear infinite;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.35);
+    border-radius: 2px;
+  }
+  @keyframes atria-progress-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .atria-progress { animation: none; opacity: 0.9; }
+  }
+
+  /* Accent focus ring w/ a soft outer glow. Applied by the .focus-ring
+   * utility already, plus this class for extra emphasis on primary CTAs. */
+  .focus-glow:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring)),
+      0 0 0 12px hsl(var(--ring) / 0.15);
+  }
+}
+
+/* ============================================================
+   atria-grid — premium polish layer over AG-Grid Quartz theme.
+   ============================================================ */
+.atria-grid {
+  position: relative;
+  background-color: hsl(var(--card));
+}
+
+.atria-grid .ag-root-wrapper {
+  border: none !important;
+  background-color: hsl(var(--card));
+}
+
+/* --- Header ------------------------------------------------- */
+.atria-grid .ag-header {
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  background-color: hsl(var(--muted) / 0.55);
+  backdrop-filter: blur(6px);
+}
+.atria-grid .ag-header-cell-text {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Right-aligned money columns: push both the header label and the cell body
+   to the flex end so decimals line up down the column. */
+.atria-grid .ag-right-aligned-header .ag-header-cell-label {
+  justify-content: flex-end;
+}
+.atria-grid .ag-cell.atria-cell-right {
+  justify-content: flex-end;
+}
+/* Pinned bottom "page sum" row — reads as part of the footer chrome. */
+.atria-grid .ag-row-pinned {
+  background-color: hsl(var(--muted) / 0.55);
+  font-weight: 600;
+}
+.atria-grid .ag-floating-bottom {
+  border-top: 1px solid hsl(var(--border)) !important;
+}
+.atria-grid .ag-header-cell-sortable .ag-icon,
+.atria-grid .ag-header-icon {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.65;
+  transition: color 120ms ease-out, opacity 120ms ease-out;
+}
+.atria-grid .ag-header-cell-sortable:hover .ag-icon,
+.atria-grid .ag-header-cell.ag-header-active .ag-icon {
+  color: hsl(var(--primary));
+  opacity: 1;
+}
+.atria-grid .ag-header-cell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: hsl(var(--border) / 0.7);
+}
+
+/* --- Rows --------------------------------------------------- */
+/* IMPORTANT: never set `position` on .ag-row — AG-Grid uses absolute
+   positioning + transform to lay rows out. Overriding it pushes every row
+   after the first to the wrong y-coordinate. The accent bar uses
+   box-shadow inset instead, which is a paint-only change. */
+.atria-grid .ag-row {
+  transition:
+    background-color 140ms ease-out,
+    box-shadow 140ms ease-out;
+}
+.atria-grid.atria-grid-clickable .ag-row {
+  cursor: pointer;
+}
+/* Persistent status accents — the same paint-only inset trick as the hover
+   bar, so problems scan straight down the column. Declared BEFORE the hover
+   rule so hovering still shows the primary accent. */
+.atria-grid .ag-row.atria-row-danger {
+  box-shadow: inset 2px 0 0 0 hsl(var(--destructive) / 0.75);
+}
+.atria-grid .ag-row.atria-row-warning {
+  box-shadow: inset 2px 0 0 0 hsl(var(--warning) / 0.75);
+}
+.atria-grid .ag-row-hover {
+  background-color: hsl(var(--primary) / 0.06) !important;
+  box-shadow: inset 3px 0 0 0 hsl(var(--primary));
+}
+.dark .atria-grid .ag-row-hover {
+  background-color: hsl(var(--primary) / 0.16) !important;
+}
+
+/* --- Cells -------------------------------------------------- */
+.atria-grid .ag-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 14px !important;
+  line-height: 1.2;
+  font-size: 13px;
+}
+
+/* --- Pagination footer -------------------------------------- */
+.atria-grid .ag-paging-panel {
+  background-color: hsl(var(--muted) / 0.55);
+  border-top: 1px solid hsl(var(--border)) !important;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  padding: 8px 16px;
+  min-height: 44px;
+}
+.atria-grid .ag-paging-button {
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  margin: 0 2px;
+  transition: background-color 120ms ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.atria-grid .ag-paging-button:not(.ag-disabled):hover {
+  background-color: hsl(var(--card));
+  box-shadow: 0 0 0 1px hsl(var(--border));
+}
+.atria-grid .ag-paging-button .ag-icon {
+  color: hsl(var(--foreground));
+}
+.atria-grid .ag-paging-button.ag-disabled .ag-icon {
+  color: hsl(var(--muted-foreground) / 0.4);
+}
+.atria-grid .ag-paging-row-summary-panel,
+.atria-grid .ag-paging-page-summary-panel {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+.atria-grid .ag-paging-page-summary-panel {
+  margin-left: 16px;
+}
+.atria-grid select.ag-paging-page-size {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  margin: 0 6px;
+}
+
+/* --- Filter popup ------------------------------------------- */
+.atria-grid .ag-menu,
+.atria-grid .ag-popup-child {
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+.atria-grid .ag-menu-header,
+.atria-grid .ag-filter-toolpanel-header,
+.atria-grid .ag-tab {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: hsl(var(--muted-foreground));
+}
+.atria-grid .ag-filter-apply-panel button {
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+.atria-grid .ag-filter-apply-panel button[ref="resetFilterButton"] {
+  background-color: transparent;
+  color: hsl(var(--muted-foreground));
+}
+.atria-grid .ag-filter-apply-panel button[ref="applyFilterButton"] {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.atria-grid .ag-input-field-input,
+.atria-grid .ag-text-field-input,
+.atria-grid .ag-number-field-input {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+.atria-grid .ag-input-field-input:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
+  outline: none;
+}
+
+/* --- Loading overlay --------------------------------------- */
+.atria-grid .ag-overlay-loading-center {
+  background-color: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow:
+    0 12px 32px -8px rgba(15, 23, 42, 0.12),
+    0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+  padding: 14px 22px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* --- Scrollbars inside the grid ---------------------------- */
+.atria-grid .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.atria-grid .ag-body-vertical-scroll-viewport::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.atria-grid .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.atria-grid .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 9999px;
+}
