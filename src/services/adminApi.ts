@@ -223,6 +223,21 @@ export const getCatalog = (
     signal: opts.signal,
   });
 
+export interface RevokeCatalogResult {
+  catalog_id: string;
+  offers_deactivated: number;
+  catalog_now_inactive: boolean;
+  network_synced: boolean;
+}
+
+/** Revoke a whole catalog: deactivate the header + every offer and withdraw it
+ * from discovery. Completed trades are unaffected. */
+export const revokeCatalog = (catalogId: string) =>
+  request<RevokeCatalogResult>(bpp, {
+    url: `/api/admin/catalogs/${encodeURIComponent(catalogId)}/revoke`,
+    method: "POST",
+  });
+
 // -------- Orders (BAP) ---------------------------------------------------
 
 export interface OrderRow {
