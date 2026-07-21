@@ -19,12 +19,11 @@ type Step = "phone" | "otp";
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
 
+// The input only ever holds 10 local digits (see the phone field); +91 is
+// the fixed country code and is added here, never typed by the user.
 const normalisePhone = (raw: string): string => {
-  const trimmed = raw.trim();
-  if (trimmed.startsWith("+")) return trimmed;
-  const digits = trimmed.replace(/\D/g, "");
-  if (digits.length === 10) return `+91${digits}`;
-  return `+${digits}`;
+  const digits = raw.replace(/\D/g, "").slice(-10);
+  return `+91${digits}`;
 };
 
 export function LoginPage() {
@@ -32,8 +31,9 @@ export function LoginPage() {
   const authState = useAdminAuth();
   const [step, setStep] = useState<Step>("phone");
   // Only prefill the test number in dev — never ship it to a real login.
+  // 10 local digits only; +91 is added by normalisePhone.
   const [phone, setPhone] = useState(
-    import.meta.env.DEV ? "+919999988888" : ""
+    import.meta.env.DEV ? "9999988888" : ""
   );
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -158,22 +158,32 @@ export function LoginPage() {
                   >
                     Phone number
                   </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
-                    placeholder="+91 99999 88888"
-                    className="focus-ring block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm transition-colors hover:border-input/80 placeholder:text-muted-foreground/60"
-                    required
-                    autoComplete="tel"
-                    autoFocus
-                  />
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-sm text-muted-foreground">
+                      +91
+                    </span>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(event) =>
+                        setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))
+                      }
+                      className="focus-ring block w-full rounded-lg border border-input bg-background pl-12 pr-3.5 py-2.5 text-sm transition-colors hover:border-input/80"
+                      required
+                      autoComplete="tel"
+                      autoFocus
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={10}
+                    />
+                  </div>
                 </div>
                 <Button
                   type="submit"
                   variant="primary"
                   loading={busy}
+                  disabled={phone.length !== 10}
                   className="w-full"
                 >
                   {busy ? "Sending code…" : "Continue"}
