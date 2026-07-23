@@ -526,6 +526,51 @@ export const disableSellerPayout = async (
   return response.data.account;
 };
 
+export interface SellerPayoutAccount {
+  seller_phone: string | null;
+  mode: string | null; // "bank" | "upi"
+  masked_target: string | null;
+  account_holder_name: string | null;
+  status: string | null; // "active" | "disabled"
+}
+
+/** A seller's current masked payout method, or null if none is on file. */
+export const getSellerPayout = async (
+  sellerPhone: string,
+  opts: { signal?: AbortSignal } = {}
+): Promise<SellerPayoutAccount | null> => {
+  const response = await payments.get<{ account: SellerPayoutAccount | null }>(
+    `/api/admin/sellers/${encodeURIComponent(sellerPhone)}/payout-details`,
+    { signal: opts.signal }
+  );
+  return response.data.account;
+};
+
+export interface ChangePayoutInput {
+  mode: "bank" | "upi";
+  account_holder_name: string;
+  ifsc?: string;
+  account_number?: string;
+  vpa?: string;
+  seller_name?: string;
+}
+
+/** Admin override for a seller's payout method — the app blocks self-serve
+ * changes. Creates a fresh RazorpayX fund account and re-activates the record. */
+export const updateSellerPayout = async (
+  sellerPhone: string,
+  input: ChangePayoutInput,
+  reason: string,
+  requestId: string
+): Promise<SellerPayoutAccount> => {
+  const response = await payments.post<{ account: SellerPayoutAccount }>(
+    `/api/admin/sellers/${encodeURIComponent(sellerPhone)}/payout-details`,
+    { ...input, reason },
+    { headers: { "X-Request-Id": requestId } }
+  );
+  return response.data.account;
+};
+
 // -------- Ledger (BPP → DEG energy ledger) -------------------------------
 
 export interface LedgerTradeDetail {
