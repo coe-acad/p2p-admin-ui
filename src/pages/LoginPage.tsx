@@ -26,15 +26,28 @@ const normalisePhone = (raw: string): string => {
   return `+91${digits}`;
 };
 
+// Short, human error text — never surface the raw "Firebase: Error (auth/…)".
+const friendlyError = (err: unknown, fallback: string): string => {
+  const code = (err as { code?: string })?.code ?? "";
+  const messages: Record<string, string> = {
+    "auth/invalid-phone-number": "That phone number doesn't look right.",
+    "auth/missing-phone-number": "Enter your phone number.",
+    "auth/too-many-requests": "Too many attempts — wait a moment and try again.",
+    "auth/invalid-verification-code": "That code isn't correct.",
+    "auth/code-expired": "That code expired — request a new one.",
+    "auth/quota-exceeded": "SMS limit reached — try again later.",
+    "auth/network-request-failed": "Network error — check your connection.",
+  };
+  return messages[code] || fallback;
+};
+
 export function LoginPage() {
   const navigate = useNavigate();
   const authState = useAdminAuth();
   const [step, setStep] = useState<Step>("phone");
-  // Only prefill the test number in dev — never ship it to a real login.
-  // 10 local digits only; +91 is added by normalisePhone.
-  const [phone, setPhone] = useState(
-    import.meta.env.DEV ? "9999988888" : ""
-  );
+  // No prefill and no placeholder, by design — the operator types their own
+  // 10 local digits; +91 is the fixed prefix added by normalisePhone.
+  const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -82,7 +95,7 @@ export function LoginPage() {
       setResendIn(RESEND_SECONDS);
     } catch (err) {
       console.error("[LoginPage] sendOtp failed", err);
-      setError(err instanceof Error ? err.message : "Failed to send OTP");
+      setError(friendlyError(err, "Couldn't send the code. Please try again."));
     } finally {
       setBusy(false);
     }
@@ -102,7 +115,7 @@ export function LoginPage() {
       navigate("/", { replace: true });
     } catch (err) {
       console.error("[LoginPage] verifyOtp failed", err);
-      setError(err instanceof Error ? err.message : "Invalid OTP");
+      setError(friendlyError(err, "That code isn't right. Try again."));
     } finally {
       setBusy(false);
     }
@@ -133,17 +146,19 @@ export function LoginPage() {
       <div className="flex min-h-screen items-center justify-center px-5 py-12">
         <div className="w-full max-w-sm animate-slide-up">
           {/* Brand */}
-          <div className="mb-10 flex flex-col items-center">
-            <img
-              src="/logo.svg"
-              alt="CharzPe"
-              className="h-12 w-12 object-contain dark:invert dark:hue-rotate-180"
-            />
-            <h1 className="mt-3 font-display text-2xl font-medium tracking-tight text-foreground">
+          <div className="mb-9 flex flex-col items-center text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card shadow-elevated ring-1 ring-black/[0.02] dark:ring-white/5">
+              <img
+                src="/logo.svg"
+                alt="CharzPe"
+                className="h-9 w-9 object-contain dark:invert dark:hue-rotate-180"
+              />
+            </div>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
               CharzPe
             </h1>
-            <p className="text-overline uppercase text-muted-foreground">
-              Admin console
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              Sign in to the admin console
             </p>
           </div>
 

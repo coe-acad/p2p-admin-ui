@@ -1,5 +1,6 @@
-import { type LucideIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
 
+import { Sparkline } from "@/components/ui/Sparkline";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps {
@@ -14,6 +15,10 @@ interface StatCardProps {
   onClick?: () => void;
   /** Marks the tile as the currently-active filter in a KPI strip. */
   active?: boolean;
+  /** Optional trend sparkline (oldest → newest); shown on non-compact cards. */
+  spark?: number[];
+  /** Optional % change vs the previous period; renders an arrow + value. */
+  deltaPct?: number | null;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -26,6 +31,16 @@ const tones: Record<NonNullable<StatCardProps["tone"]>, string> = {
   info: "bg-info/10 text-info ring-info/20",
 };
 
+// Sparkline stroke per tone — the design system's own semantic token, softened
+// so the line reads as context rather than a second focal point.
+const sparkTones: Record<NonNullable<StatCardProps["tone"]>, string> = {
+  default: "text-muted-foreground/60",
+  success: "text-success/70",
+  warning: "text-warning-strong/70",
+  danger: "text-destructive/70",
+  info: "text-info/70",
+};
+
 export function StatCard({
   label,
   value,
@@ -35,6 +50,8 @@ export function StatCard({
   compact = false,
   onClick,
   active = false,
+  spark,
+  deltaPct,
   className,
   style,
 }: StatCardProps) {
@@ -80,10 +97,30 @@ export function StatCard({
       >
         {value}
       </p>
-      {hint && (
-        <p className={cn("text-xs text-muted-foreground", compact ? "mt-1.5" : "mt-2")}>
-          {hint}
-        </p>
+      {(hint || (deltaPct != null && Number.isFinite(deltaPct))) && (
+        <div
+          className={cn(
+            "flex items-center gap-1.5 text-xs text-muted-foreground",
+            compact ? "mt-1.5" : "mt-2"
+          )}
+        >
+          {deltaPct != null && Number.isFinite(deltaPct) && (
+            <span className="inline-flex items-center gap-0.5 font-medium tabular-nums text-foreground/70">
+              {deltaPct >= 0 ? (
+                <ArrowUpRight className="h-3 w-3" />
+              ) : (
+                <ArrowDownRight className="h-3 w-3" />
+              )}
+              {Math.abs(deltaPct) >= 999 ? "999+%" : `${Math.abs(Math.round(deltaPct))}%`}
+            </span>
+          )}
+          {hint && <span className="min-w-0 truncate">{hint}</span>}
+        </div>
+      )}
+      {!compact && spark && spark.length > 1 && (
+        <div className="mt-3">
+          <Sparkline data={spark} className={sparkTones[tone]} />
+        </div>
       )}
     </Comp>
   );

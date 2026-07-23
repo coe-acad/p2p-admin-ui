@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   BookOpen,
-  Copy,
   CreditCard,
   LayoutDashboard,
   LayoutList,
@@ -20,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { CopyChip } from "@/components/ui/CopyChip";
 import { Kbd } from "@/components/ui/Kbd";
 import { Modal } from "@/components/ui/Modal";
 import { auth } from "@/lib/firebase";
@@ -267,24 +267,20 @@ function ProfileMenu({
           )}
         >
           <div className="px-2 py-1.5">
-            <p className="truncate font-mono text-xs text-foreground">
-              {phoneNumber ?? "Signed in"}
-            </p>
+            {phoneNumber ? (
+              // Same click-to-copy → green-tick affordance used for every id in
+              // the app, instead of a separate "Copy phone" menu row.
+              <CopyChip value={phoneNumber} className="text-xs" />
+            ) : (
+              <p className="truncate font-mono text-xs text-foreground">
+                Signed in
+              </p>
+            )}
             <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               Signed in as admin
             </p>
           </div>
           <DropdownMenu.Separator className="my-1 h-px bg-border" />
-          {phoneNumber && (
-            <MenuItem
-              icon={Copy}
-              onSelect={() =>
-                navigator.clipboard?.writeText(phoneNumber).catch(() => undefined)
-              }
-            >
-              Copy phone
-            </MenuItem>
-          )}
           <MenuItem
             icon={isDark ? Sun : Moon}
             onSelect={(e) => {
