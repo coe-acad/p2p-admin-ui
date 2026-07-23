@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
+  Ban,
   CalendarCheck,
   CalendarClock,
   Gauge,
@@ -20,10 +21,11 @@ import { BackLink } from "@/components/ui/BackLink";
 import { Button } from "@/components/ui/Button";
 import { DataGrid } from "@/components/ui/DataGrid";
 import { IdCell, MoneyCell, TimeCell } from "@/components/ui/cells";
+import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
-import { getCatalog, type Offer } from "@/services/adminApi";
+import { getCatalog, revokeCatalog, type Offer } from "@/services/adminApi";
 
 const sourceIcon = (source: string | null): typeof Sun => {
   if (!source) return Zap;
@@ -48,6 +50,19 @@ export function CatalogDetailPage() {
     queryKey: ["catalog", "detail", catalogId],
     queryFn: ({ signal }) => getCatalog(catalogId ?? "", { signal }),
     enabled: Boolean(catalogId),
+  });
+
+  const queryClient = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const revoke = useMutation({
+    mutationFn: () => revokeCatalog(catalogId ?? ""),
+    onSuccess: () => {
+      setConfirmOpen(false);
+      // Refetch this catalog so the header + offers flip to Inactive.
+      queryClient.invalidateQueries({
+        queryKey: ["catalog", "detail", catalogId],
+      });
+    },
   });
 
   const offerColumns = useMemo<ColDef<Offer>[]>(
@@ -170,16 +185,31 @@ export function CatalogDetailPage() {
         eyebrow="Catalog"
         title={q.data?.seller_name ?? "Catalog"}
         actions={
-          <Button
-            onClick={() => q.refetch()}
-            variant="secondary"
-            disabled={q.isFetching}
-          >
-            <RefreshCw
-              className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")}
-            />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            {q.data?.is_active && (
+              <Button
+                onClick={() => {
+                  revoke.reset();
+                  setConfirmOpen(true);
+                }}
+                variant="danger"
+                disabled={revoke.isPending}
+              >
+                <Ban className="h-3.5 w-3.5" />
+                Revoke catalog
+              </Button>
+            )}
+            <Button
+              onClick={() => q.refetch()}
+              variant="secondary"
+              disabled={q.isFetching}
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")}
+              />
+              Refresh
+            </Button>
+          </div>
         }
       />
 
@@ -216,6 +246,44 @@ export function CatalogDetailPage() {
           />
         </>
       )}
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => !revoke.isPending && setConfirmOpen(false)}
+        title="Revoke this catalog?"
+        description="Every offer is deactivated and the catalog is withdrawn from discovery, so no new buyers can select it."
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmOpen(false)}
+              disabled={revoke.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => revoke.mutate()}
+              loading={revoke.isPending}
+            >
+              Revoke catalog
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          {revoke.isError && (
+            <Alert tone="danger">
+              {(revoke.error as { message?: string } | null)?.message ??
+                "Revoke failed"}
+            </Alert>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Completed trades are unaffected — they stay valid on the ledger. This
+            only stops future discovery and selection.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

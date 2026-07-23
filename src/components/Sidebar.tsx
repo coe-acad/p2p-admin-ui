@@ -51,7 +51,8 @@ const navSections = [
   },
 ] as const;
 
-// Environment ribbon — operators must always know which environment they're in.
+// Environment ribbon — flags non-production envs (DEV/STAGING) so operators
+// don't mistake them for prod. Hidden in production: no badge == prod.
 const ENV = import.meta.env.MODE;
 const ENV_LABEL =
   ENV === "production" ? "PROD" : ENV === "staging" ? "STAGING" : "DEV";
@@ -96,17 +97,14 @@ export function Sidebar({ phoneNumber }: SidebarProps) {
             Admin console
           </p>
         </div>
-        <span
-          className={cn(
-            "ml-auto rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
-            ENV_IS_PROD
-              ? "bg-warning/10 text-warning-strong ring-1 ring-inset ring-warning/25"
-              : "bg-muted text-muted-foreground ring-1 ring-inset ring-border"
-          )}
-          title={`Environment: ${ENV_LABEL}`}
-        >
-          {ENV_LABEL}
-        </span>
+        {!ENV_IS_PROD && (
+          <span
+            className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground ring-1 ring-inset ring-border"
+            title={`Environment: ${ENV_LABEL}`}
+          >
+            {ENV_LABEL}
+          </span>
+        )}
       </div>
 
       {/* ---------- Nav ---------------------------------------- */}
