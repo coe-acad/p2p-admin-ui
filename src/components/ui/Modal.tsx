@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -37,7 +38,11 @@ export function Modal({
 
   if (!open) return null;
 
-  return (
+  // Portal to <body> so the modal escapes the Sidebar's sticky stacking context
+  // (position:sticky creates one). Rendered inline, its z-50 only applies inside
+  // the sidebar and page content paints over it — hiding the dialog on every
+  // route except where nothing happens to cover it (the "ghost").
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div
         className="absolute inset-0 bg-overlay/50 backdrop-blur-[2px] animate-fade-in"
@@ -75,6 +80,7 @@ export function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

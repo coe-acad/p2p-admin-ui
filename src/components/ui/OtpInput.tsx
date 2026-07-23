@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function OtpInput({
   autoFocus,
 }: OtpInputProps) {
   const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const [revealed, setRevealed] = useState(false);
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
 
   const commit = (next: string) => {
@@ -82,7 +84,8 @@ export function OtpInput({
   };
 
   return (
-    <div className="flex justify-between gap-2" onPaste={handlePaste}>
+    <div className="flex items-center gap-2">
+      <div className="flex flex-1 justify-between gap-2" onPaste={handlePaste}>
       {digits.map((digit, index) => (
         <input
           key={index}
@@ -99,6 +102,13 @@ export function OtpInput({
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onFocus={(e) => e.currentTarget.select()}
+          // Mask the entered digit as a dot (shoulder-surfing protection) unless
+          // revealed; numeric input + OTP autofill are unaffected either way.
+          style={
+            revealed
+              ? undefined
+              : ({ WebkitTextSecurity: "disc" } as React.CSSProperties)
+          }
           className={cn(
             "nums h-12 w-full rounded-lg border bg-background text-center text-xl font-semibold text-foreground transition-colors",
             "focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-ring/15",
@@ -107,6 +117,16 @@ export function OtpInput({
           )}
         />
       ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setRevealed((r) => !r)}
+        aria-label={revealed ? "Hide code" : "Show code"}
+        tabIndex={-1}
+        className="focus-ring flex h-12 w-9 shrink-0 items-center justify-center rounded-lg border border-input text-muted-foreground transition-colors hover:border-input/80 hover:text-foreground"
+      >
+        {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
     </div>
   );
 }
