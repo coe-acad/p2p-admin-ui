@@ -56,9 +56,7 @@ const statusToVariant = (status?: string | null): Variant => {
     s === "COMPLETED" ||
     // settlement terminal-success states
     s === "COMPLETE" ||
-    s === "RESOLVED" ||
-    // ledger delivery status
-    s === "DELIVERED"
+    s === "RESOLVED"
   ) {
     return "success";
   }
@@ -72,7 +70,10 @@ const statusToVariant = (status?: string | null): Variant => {
     s === "QUEUED" ||
     s === "PROCESSING" ||
     // needs an operator's eyes, but not a hard failure
-    s === "NEEDS_REVIEW"
+    s === "NEEDS_REVIEW" ||
+    // DEG discom delivery states: energy still flowing, or short-delivered
+    s === "IN_PROGRESS" ||
+    s === "PARTIALLYFULFILLED"
   ) {
     return "warning";
   }

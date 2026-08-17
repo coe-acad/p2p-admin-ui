@@ -552,8 +552,12 @@ export interface LedgerRow {
   tradeDetails: LedgerTradeDetail[] | null;
   creationTime: string | null;
   rowDigest: string | null;
+  // Delivery status as reported by each discom, straight off the ledger record.
+  // COMPLETED | FAILED | PARTIALLYFULFILLED | IN_PROGRESS. Absent on the older
+  // test-network rows, which the DEG discoms never reported a status for.
+  statusBuyerDiscom: string | null;
+  statusSellerDiscom: string | null;
   // Enriched by the BPP endpoint (not on the raw ledger record):
-  delivery_status: string | null; // DELIVERED | SCHEDULED | UNKNOWN
   settlement_status: string | null; // settlement doc status, or NOT_SETTLED
 }
 

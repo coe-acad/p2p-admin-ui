@@ -57,6 +57,8 @@ const STATUS_LABELS: Record<string, string> = {
   QUEUED: "Queued",
   PROCESSING: "Processing",
   REJECTED: "Rejected",
+  // DEG discom delivery status (ledger)
+  PARTIALLYFULFILLED: "Partly delivered",
   REVERSED: "Reversed",
   SKIPPED: "Skipped",
 };
