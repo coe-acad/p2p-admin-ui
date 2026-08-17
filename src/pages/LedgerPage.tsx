@@ -94,11 +94,19 @@ export function LedgerPage() {
         ),
       },
       {
-        headerName: "Delivery",
-        field: "delivery_status",
-        width: 120,
+        headerName: "Seller discom",
+        field: "statusSellerDiscom",
+        width: 140,
         cellRenderer: (p: { data: LedgerRow }) => (
-          <StatusPill status={p.data.delivery_status} />
+          <StatusPill status={p.data.statusSellerDiscom} />
+        ),
+      },
+      {
+        headerName: "Buyer discom",
+        field: "statusBuyerDiscom",
+        width: 140,
+        cellRenderer: (p: { data: LedgerRow }) => (
+          <StatusPill status={p.data.statusBuyerDiscom} />
         ),
       },
       {
@@ -213,7 +221,7 @@ export function LedgerPage() {
         onClearFilters={hasFilters ? clearAll : undefined}
         hasFilters={hasFilters}
         resourceLabel="ledger records"
-        columns={9}
+        columns={10}
       >
         <GridCard>
           <DataGrid<LedgerRow>
